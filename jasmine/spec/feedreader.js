@@ -42,9 +42,10 @@ $(function() {
 
         // a test that ensures the menu element is hidden by default.
         it('menu is hidden', function(){
-            let body = document.getElementsByTagName('body')[0];
-            //we use body[0] because 'body' is an HTML collection so we need the first element of the collection to get the class name
-            expect(body.className).toBe('menu-hidden')
+            let body = $("body");
+
+            expect(body.hasClass('menu-hidden')).toBe(true)
+            
         })
 
          /*  a test that ensures the menu changes
@@ -52,11 +53,11 @@ $(function() {
           */
          it('menu is hidden/displayed', function(){
              let menuIcon = document.getElementsByClassName('menu-icon-link')[0];
-             let body = document.getElementsByTagName('body')[0];
+             let body = $("body");
              menuIcon.click()
-             expect(body.className).toBe('') //Check that the menu is displayed after the first click
+             expect(body.hasClass('menu-hidden')).toBe(false) //Check that the menu is displayed after the first click
              menuIcon.click()
-             expect(body.className).toBe('menu-hidden') //Check that the menu is hidden after the second click
+             expect(body.hasClass('menu-hidden')).toBe(true) //Check that the menu is hidden after the second click
          })
 
     })
@@ -68,19 +69,17 @@ $(function() {
          * function is called and completes its work, there is at least
          * a single .entry element within the .feed container.
          */
-        
+        let entriesLength
+
         beforeEach(function(done){
-            setTimeout(function(){
-                loadFeed(1)
-                done()
-            }, 1000)
-             
+           loadFeed(0, function(){
+            entriesLength = $('.feed .entry').length //the length tells us how many entries are in the container
+            done()
+           })
+            
         })
 
         it('at least single entry', function(done){
-           
-           let container = document.querySelector('.feed')
-           let entriesLength = container.children.length //the length tells us how many entries are in the container
            
            expect(entriesLength).toBeGreaterThan(0)
            done()
@@ -94,26 +93,20 @@ $(function() {
         /*  a test that ensures when a new feed is loaded
          * by the loadFeed function that the content actually changes.
          */
-        let title 
+        let feed
+        let feed2  
         beforeEach(function(done){
-            setTimeout(function(){
-                loadFeed(1)
-                title = document.querySelector('.header-title').innerText // get the header title
-                done()
-            }, 2000)
-             
+            loadFeed(0, function(){
+                feed = $('.feed').html()
+                loadFeed(1, function(){
+                    feed2 = $('.feed').html()
+                    done()
+                })
+            })
         })
 
         it('content ia changed', function(done){
-            let title2 
-            setTimeout(function(){
-                title2 = document.querySelector('.header-title').innerText
-            }, 3000) /* it needs to run later
-                        so that we can have time to save
-                        the title of the first content then save the title
-                        of the second content and compare them with each other
-                     */
-            expect(title).not.toBe(title2) // if the titles are different that means that the content is changed
+            expect(feed).not.toBe(feed2) // if the feeds are different that means that the content is changed
             done()
          })
     })
